@@ -1,0 +1,56 @@
+﻿
+@model Index
+@{
+    ViewData["Title"] = "Registation page";
+}
+
+@if(TempData["AlertMessage"] !=null)
+{
+    <div class = "align-content-end">
+    <strong> @TempData["TryResult"]</strong> @TempData["AlertMessage"]
+    </div>
+}
+
+
+
+<div>
+    <h1 class = "display-4"> Создайте аккаунт  </h1>
+
+    <form method='post'>
+        <p><b>Введите Логин:</b><br>
+            <input type="text" name = 'login' size="40">
+        </p>
+
+        <p>
+            <b>Введите Пароль:</b><br>
+            <input type="password" name = 'password' size="40">
+        </p>
+
+        <p>
+            <b>Повторите Пароль:</b><br>
+            <input type="password" name = 'passwordrepeat'size="40">
+        </p>
+
+        <p>
+            <b>Тип пользователя:</b><br>
+            <div>
+                <input type="radio" id="contactChoice1"
+                name="role" value="user">
+                <label for="contactChoice1">Обычный</label>
+
+                <input type="radio" id="contactChoice2"
+                name="role" value="admin">
+                <label for="contactChoice2">Админ</label>
+            </div>
+        </p>
+
+
+        <p>
+            <input type="submit" value="Создать аккаунт">
+            <input type="reset" value="Очистить поля ввода">
+        </p>
+
+    </form>
+
+</div>
+

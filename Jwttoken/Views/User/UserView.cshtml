@@ -1,0 +1,19 @@
+﻿@model Index
+@{
+    ViewData["Title"] = "UserPage";
+}
+
+<div>
+    <h1 class = "display-4"> Добро Пожаловать, @User.Identity.Name !  </h1>
+
+    <form asp-action="input1.php">
+        <p>
+            <b>Ваша Роль: пользователь</b><br>
+        </p>
+    </form>
+
+    <form method = 'post'>
+    <input type="button" value="Выйти из аккаунта" onclick="location.href='@Url.Action("CookieClear", "Home")'" />
+    </form>
+
+</div>

@@ -1,0 +1,44 @@
+﻿
+@model Index
+@{
+    ViewData["Title"] = "Login page";
+}
+
+@if(TempData["AlertMessage"] !=null)
+{
+    <div class = "align-content-end">
+    <strong> @TempData["TryResult"]</strong> @TempData["AlertMessage"]
+    </div>
+}
+
+
+   
+
+
+<div>
+    <h1 class = "display-4"> Войдите в аккаунт  </h1>
+
+    <form method='post'>
+
+        <p><b>Введите Логин:</b><br>
+            <input type="text" name = 'login' size="40">
+        </p>
+
+        <p>
+            <b>Введите Пароль:</b><br>
+            <input type="password" name = 'password' size="40">
+        </p>
+
+        <p>
+            <input type="submit" value="Войти">
+            <input type="reset" value="Очистить поля ввода">
+        </p>
+
+        <p>
+            <input type="button" value="Зарегестрироваться" onclick="location.href='@Url.Action("Registration", "Register")'" />
+        </p>
+
+    </form>
+
+</div>
+
