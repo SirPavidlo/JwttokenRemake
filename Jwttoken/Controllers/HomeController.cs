@@ -29,8 +29,8 @@ namespace Jwttoken.Controllers
         {
             
             TempData["path"] = @"C:\ProgramData\users.txt";
-
-            if (User.Identity.IsAuthenticated)
+            //это ж должно работать
+            if (User.Identity!.IsAuthenticated)
             {
                 return Redirect("/Home/AlreadyAuth");
             }

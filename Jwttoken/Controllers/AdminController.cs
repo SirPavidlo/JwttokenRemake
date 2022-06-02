@@ -8,6 +8,7 @@ namespace Jwttoken.Controllers
     {
         public IActionResult Admins()
         {
+            //админ ы
             return View("AdminView");
         }
     }
