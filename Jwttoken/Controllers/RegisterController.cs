@@ -18,7 +18,7 @@ namespace Jwttoken.Controllers
         [HttpPost]
         public ActionResult Registration(string login, string password, string passwordrepeat, string role)
         {
-            string path = (string)TempData["path"];
+            string path = (string)TempData["path"]!;
             TempData["TryResult"] = "Ошибка!";
             if (login == null || password ==null|| passwordrepeat==null|| role==null) { TempData["AlertMessage"] = "Заполните все поля!";  return RedirectToAction("Registration"); }
             else if (password != passwordrepeat) { TempData["AlertMessage"] = "Пароли должны совападать!"; return RedirectToAction("Registration"); }
@@ -68,7 +68,7 @@ namespace Jwttoken.Controllers
             using (StreamReader sr = new StreamReader(path))
             {
                 string line;
-                while ((line = sr.ReadLine()) != null)
+                while ((line = sr.ReadLine()!) != null)
                 {
                     linescount++;
                 }

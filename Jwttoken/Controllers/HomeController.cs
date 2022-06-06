@@ -29,7 +29,6 @@ namespace Jwttoken.Controllers
         {
             
             TempData["path"] = @"C:\ProgramData\users.txt";
-            //это ж должно работать
             if (User.Identity!.IsAuthenticated)
             {
                 return Redirect("/Home/AlreadyAuth");
@@ -41,24 +40,24 @@ namespace Jwttoken.Controllers
         public ActionResult Index(string login, string password)
         {
             string test = login;
-            var users = ConvertText((string)TempData["path"]);
+            var users = ConvertText((string)TempData["path"]!);
             foreach (var user in users)
             {
                 if (login == user.Login && BCrypt.Net.BCrypt.EnhancedVerify(password, user.Password) == true)
                 {
                     var claims = new List<Claim> { new Claim(ClaimTypes.Name, login), new Claim(ClaimTypes.Role, user.Role) };
                     // создаем JWT-токен
+
                     var jwt = new JwtSecurityToken(
                             issuer: AuthOptions.ISSUER,
                             audience: AuthOptions.AUDIENCE,
                             claims: claims,
                             expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)),
-                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)); ;
 
                     var jwtsecuritytoken = new JwtSecurityTokenHandler().WriteToken(jwt);
-                    Response.Cookies.Append("jwt", jwtsecuritytoken);
-                    if (user.Role == "admin") { return View("/Views/Admin/AdminView.cshtml", users); }
-                    else { return Redirect("/User/Users"); }
+                    Response.Cookies.Append("jwt", jwtsecuritytoken, new CookieOptions { Expires = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(10) )});
+                    return Redirect("/Home/AlreadyAuth");
                 }
             }
             TempData["AlertMessage"] = "Пользователя с таким логином не существует"; return null;
@@ -70,7 +69,7 @@ namespace Jwttoken.Controllers
             using (StreamReader sr = new StreamReader(path))
             {
                 string line;
-                while ((line = sr.ReadLine()) != null)
+                while ((line = sr.ReadLine()!) != null)
                 {
                     linescount++;
                 }
@@ -102,12 +101,16 @@ namespace Jwttoken.Controllers
 
         public IActionResult AlreadyAuth()
         {
-            var users = ConvertText((string)TempData["path"]);
+            var users = ConvertText((string)TempData["path"]!);
             foreach (var user in users)
             {
-                if (User.Identity.Name == user.Login)
+                if (User.Identity!.Name == user.Login)
                 {
-                    if (user.Role == "admin") { return View("/Views/Admin/AdminView.cshtml", users); }
+                    if (user.Role == "admin")
+                    {
+                        TempData["adm_name"] = User.Identity.Name;
+                        return View("/Views/Admin/AdminView.cshtml", users); 
+                    }
                     else { return Redirect("/User/Users"); }
                 }
 

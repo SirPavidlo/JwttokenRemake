@@ -29,7 +29,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-//я очень плохо понимаю, как работают следующие 10 строк
 app.Use(async (context, next) =>
 {
     var jwt = context.Request.Cookies["jwt"];
