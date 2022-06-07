@@ -101,21 +101,14 @@ namespace Jwttoken.Controllers
 
         public IActionResult AlreadyAuth()
         {
-            var users = ConvertText((string)TempData["path"]!);
-            foreach (var user in users)
+          
+            if (User.IsInRole("admin"))
             {
-                if (User.Identity!.Name == user.Login)
-                {
-                    if (user.Role == "admin")
-                    {
-                        TempData["adm_name"] = User.Identity.Name;
-                        return View("/Views/Admin/AdminView.cshtml", users); 
-                    }
-                    else { return Redirect("/User/Users"); }
-                }
-
+                var users = ConvertText((string)TempData["path"]!);
+                return View("/Views/Admin/AdminView.cshtml", users); 
             }
-            return Redirect("/Home/Index");
+            else { return Redirect("/User/Users"); }
+
         }
 
         public IActionResult CookieClear()
