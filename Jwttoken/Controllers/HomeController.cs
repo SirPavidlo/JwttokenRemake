@@ -18,6 +18,9 @@ namespace Jwttoken.Controllers
     
     public class HomeController : Controller
     {
+
+         string path = @"C:\ProgramData\users.txt";
+
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)
@@ -27,20 +30,30 @@ namespace Jwttoken.Controllers
 
         public IActionResult Index()
         {
-            
-            TempData["path"] = @"C:\ProgramData\users.txt";
-            if (User.Identity!.IsAuthenticated)
+
+            //TempData["path"] = @"C:\ProgramData\users.txt";
+
+            /*if (User.IsInRole("admin"))
             {
-                return Redirect("/Home/AlreadyAuth");
+                var users = ConvertText((string)TempData["path"]!);
+                return View("/Views/Admin/AdminView.cshtml", users);
             }
+
+            if (User.IsInRole("user"))
+            {
+                return Redirect("/User/Users");
+            }
+            */
+
             return View();
         }
+
 
         [HttpPost]
         public ActionResult Index(string login, string password)
         {
             string test = login;
-            var users = ConvertText((string)TempData["path"]!);
+            var users = ConvertText();
             foreach (var user in users)
             {
                 if (login == user.Login && BCrypt.Net.BCrypt.EnhancedVerify(password, user.Password) == true)
@@ -52,19 +65,42 @@ namespace Jwttoken.Controllers
                             issuer: AuthOptions.ISSUER,
                             audience: AuthOptions.AUDIENCE,
                             claims: claims,
-                            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)),
+                            expires: DateTime.Now.Add(TimeSpan.FromSeconds(30)),
                             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)); ;
 
                     var jwtsecuritytoken = new JwtSecurityTokenHandler().WriteToken(jwt);
-                    Response.Cookies.Append("jwt", jwtsecuritytoken, new CookieOptions { Expires = DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(10) )});
-                    return Redirect("/Home/AlreadyAuth");
+                    Response.Cookies.Append("jwt", jwtsecuritytoken, new CookieOptions { Expires = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(10) )});
+                    //return Redirect("/Home/AlreadyAuth");
+                    return Redirect("/Home/EnterProgramm");
                 }
             }
-            TempData["AlertMessage"] = "Пользователя с таким логином не существует"; return null;
+            TempData["AlertMessage"] = "Пользователя с таким логином не существует"; return null!;
         }
 
-        private string[] ReadFile(string path) //считывание из файла построчно в string-массив
+        public IActionResult EnterProgramm()
         {
+
+            //TempData["path"] = @"C:\ProgramData\users.txt";
+
+            if (User.IsInRole("admin"))
+            {
+                var users = ConvertText();
+                return View("/Views/Admin/AdminView.cshtml", users);
+            }
+
+            if (User.IsInRole("user"))
+            {
+                return Redirect("/User/Users");
+            }
+
+
+            return View("/Views/Home/Index.cshtml");
+        }
+
+        private string[] ReadFile() //считывание из файла построчно в string-массив
+        {
+            //TempData["path"] = @"C:\ProgramData\users.txt";
+            //path = (string)TempData["path"]!;
             int linescount = 0;
             using (StreamReader sr = new StreamReader(path))
             {
@@ -87,9 +123,9 @@ namespace Jwttoken.Controllers
             return text;
         }
 
-        private List<User> ConvertText(string path)//разбиение построчного строчного массива в лист экземляров юзера
+        private List<User> ConvertText()//разбиение построчного строчного массива в лист экземляров юзера
         {
-            string[] text = ReadFile(path);
+            string[] text = ReadFile();
             List<User> users = new List<User>();
             foreach (var elem in text)
             {
@@ -99,18 +135,19 @@ namespace Jwttoken.Controllers
             return users;
         }
 
-        public IActionResult AlreadyAuth()
+        /*public IActionResult AlreadyAuth()
         {
           
             if (User.IsInRole("admin"))
             {
-                var users = ConvertText((string)TempData["path"]!);
+                var users = ConvertText();
                 return View("/Views/Admin/AdminView.cshtml", users); 
             }
             else { return Redirect("/User/Users"); }
 
         }
-
+        
+        */
         public IActionResult CookieClear()
         {
             Response.Cookies.Delete("jwt");
