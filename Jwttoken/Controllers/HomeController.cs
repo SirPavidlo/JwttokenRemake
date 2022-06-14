@@ -30,21 +30,6 @@ namespace Jwttoken.Controllers
 
         public IActionResult Index()
         {
-
-            //TempData["path"] = @"C:\ProgramData\users.txt";
-
-            /*if (User.IsInRole("admin"))
-            {
-                var users = ConvertText((string)TempData["path"]!);
-                return View("/Views/Admin/AdminView.cshtml", users);
-            }
-
-            if (User.IsInRole("user"))
-            {
-                return Redirect("/User/Users");
-            }
-            */
-
             return View();
         }
 
@@ -74,14 +59,11 @@ namespace Jwttoken.Controllers
                     return Redirect("/Home/EnterProgramm");
                 }
             }
-            TempData["AlertMessage"] = "Пользователя с таким логином не существует"; return null!;
+            TempData["AlertMessage"] = "Неправильный логин или пароль"; return Redirect("Home/Index");
         }
 
         public IActionResult EnterProgramm()
         {
-
-            //TempData["path"] = @"C:\ProgramData\users.txt";
-
             if (User.IsInRole("admin"))
             {
                 var users = ConvertText();
@@ -94,7 +76,8 @@ namespace Jwttoken.Controllers
             }
 
 
-            return View("/Views/Home/Index.cshtml");
+           return View("/Views/Home/Index.cshtml");
+            //return View("/Views/Register/Registration.cshtml"); 
         }
 
         private string[] ReadFile() //считывание из файла построчно в string-массив

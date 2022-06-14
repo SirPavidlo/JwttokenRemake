@@ -8,6 +8,7 @@ namespace Jwttoken.Controllers
 {
     public class RegisterController : Controller
     {
+        string path = @"C:\ProgramData\users.txt";
 
         public IActionResult Registration()
         {
@@ -18,7 +19,6 @@ namespace Jwttoken.Controllers
         [HttpPost]
         public ActionResult Registration(string login, string password, string passwordrepeat, string role)
         {
-            string path = (string)TempData["path"]!;
             TempData["TryResult"] = "Ошибка!";
             if (login == null || password ==null|| passwordrepeat==null|| role==null) { TempData["AlertMessage"] = "Заполните все поля!";  return RedirectToAction("Registration"); }
             else if (password != passwordrepeat) { TempData["AlertMessage"] = "Пароли должны совападать!"; return RedirectToAction("Registration"); }
@@ -27,7 +27,7 @@ namespace Jwttoken.Controllers
             {
                 string texttofile = login + "|" + BCrypt.Net.BCrypt.EnhancedHashPassword(password) + "|" + role + "\n";
 
-                WriteFile(path, texttofile);
+                WriteFile( texttofile);
                 TempData["TryResult"] = "Успех!";
                 TempData["AlertMessage"] = "Аккаунт успешно создан!";
                 return RedirectPermanent("/Home/Index");
@@ -36,7 +36,7 @@ namespace Jwttoken.Controllers
         }
 
 
-        private async void WriteFile(string path, string text)
+        private async void WriteFile(string text)
         {
             using (FileStream fstream = new FileStream(path, FileMode.Append))
             {

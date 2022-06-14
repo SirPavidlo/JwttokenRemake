@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Jwttoken.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "AdminOrUser")]
     public class UserController : Controller
     {
         public IActionResult Users()

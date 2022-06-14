@@ -19,7 +19,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("Admin", policy => policy.RequireRole("admin"));
+        options.AddPolicy("AdminOrUser", policy => policy.RequireRole("admin", "user"));
+        //админ или юзер я сделал ради интереса, но я думаю в крупном проекте может быть возможность админа зайти на свой аккаунт в качестве пользователя или в качестве админа(на выбор)
+
+    }
+    );
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -54,14 +63,13 @@ app.Use(async (context, next) =>
 
         if (handler.ValidTo < DateTime.UtcNow)
         {
-            if (context.Request.Path != "/Home/Index")
-            {
+           // if (context.Request.Path != "/Home/Index")
+            //{
+                context.Response.Cookies.Delete("jwt");
                 context.Response.Redirect("/Home/Index");
-            }
-
-
+                return;
+            //}
         }
-
     }
     
 
@@ -69,6 +77,8 @@ app.Use(async (context, next) =>
 });
 
 app.UseAuthentication();
+
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
