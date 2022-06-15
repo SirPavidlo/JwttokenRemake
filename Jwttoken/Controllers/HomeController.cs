@@ -30,6 +30,18 @@ namespace Jwttoken.Controllers
 
         public IActionResult Index()
         {
+            if (User.IsInRole("admin"))
+            {
+                var users = ConvertText();
+                return View("/Views/Admin/AdminView.cshtml", users);
+            }
+
+            if (User.IsInRole("user"))
+            {
+                return Redirect("/User/Users");
+            }
+
+
             return View();
         }
 
@@ -56,29 +68,12 @@ namespace Jwttoken.Controllers
                     var jwtsecuritytoken = new JwtSecurityTokenHandler().WriteToken(jwt);
                     Response.Cookies.Append("jwt", jwtsecuritytoken, new CookieOptions { Expires = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(10) )});
                     //return Redirect("/Home/AlreadyAuth");
-                    return Redirect("/Home/EnterProgramm");
+                    return Redirect("/Home/Index");
                 }
             }
             TempData["AlertMessage"] = "Неправильный логин или пароль"; return Redirect("Home/Index");
         }
 
-        public IActionResult EnterProgramm()
-        {
-            if (User.IsInRole("admin"))
-            {
-                var users = ConvertText();
-                return View("/Views/Admin/AdminView.cshtml", users);
-            }
-
-            if (User.IsInRole("user"))
-            {
-                return Redirect("/User/Users");
-            }
-
-
-           return View("/Views/Home/Index.cshtml");
-            //return View("/Views/Register/Registration.cshtml"); 
-        }
 
         private string[] ReadFile() //считывание из файла построчно в string-массив
         {
