@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace Jwttoken.Controllers
 {
@@ -19,7 +20,11 @@ namespace Jwttoken.Controllers
     public class HomeController : Controller
     {
 
-         string path = @"C:\ProgramData\users.txt";
+        string path = @"C:\ProgramData\users.txt";
+        int? trycount;
+
+
+       
 
         private readonly ILogger<HomeController> _logger;
 
@@ -30,6 +35,7 @@ namespace Jwttoken.Controllers
 
         public IActionResult Index()
         {
+
             if (User.IsInRole("admin"))
             {
                 var users = ConvertText();
@@ -53,32 +59,48 @@ namespace Jwttoken.Controllers
             var users = ConvertText();
             foreach (var user in users)
             {
-                if (login == user.Login && BCrypt.Net.BCrypt.EnhancedVerify(password, user.Password) == true)
+                if (login == user.Login)
                 {
-                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, login), new Claim(ClaimTypes.Role, user.Role) };
-                    // создаем JWT-токен
+                    if (BCrypt.Net.BCrypt.EnhancedVerify(password, user.Password) == true)
+                    {
+                        var claims = new List<Claim> { new Claim(ClaimTypes.Name, login), new Claim(ClaimTypes.Role, user.Role) };
+                        // создаем JWT-токен
 
-                    var jwt = new JwtSecurityToken(
-                            issuer: AuthOptions.ISSUER,
-                            audience: AuthOptions.AUDIENCE,
-                            claims: claims,
-                            expires: DateTime.Now.Add(TimeSpan.FromSeconds(30)),
-                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)); ;
+                        var jwt = new JwtSecurityToken(
+                                issuer: AuthOptions.ISSUER,
+                                audience: AuthOptions.AUDIENCE,
+                                claims: claims,
+                                expires: DateTime.Now.Add(TimeSpan.FromSeconds(30)),
+                                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)); ;
 
-                    var jwtsecuritytoken = new JwtSecurityTokenHandler().WriteToken(jwt);
-                    Response.Cookies.Append("jwt", jwtsecuritytoken, new CookieOptions { Expires = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(10) )});
-                    //return Redirect("/Home/AlreadyAuth");
-                    return Redirect("/Home/Index");
+                        var jwtsecuritytoken = new JwtSecurityTokenHandler().WriteToken(jwt);
+                        Response.Cookies.Append("jwt", jwtsecuritytoken, new CookieOptions { Expires = DateTimeOffset.Now.Add(TimeSpan.FromMinutes(10)) });
+                        //return Redirect("/Home/AlreadyAuth");
+                        return Redirect("/Home/Index");
+                    }
+                    else
+                    {
+                        trycount = (int?)TempData["WrongPassword"];
+                        if (trycount == null) { trycount = 0; }
+                        trycount++;
+                        TempData["WrongPassword"] = trycount;
+                        if (trycount >= 3) { return Redirect("/Alert/Index"); }
+                        return Redirect("/Home/Index");
+                    }
+
                 }
+                else { TempData["AlertMessage"] = "Такого пользователя не существует"; return Redirect("/Home/Index"); }
             }
-            TempData["AlertMessage"] = "Неправильный логин или пароль"; return Redirect("Home/Index");
+            return Redirect("/Home/Index");
+
         }
+
 
 
         private string[] ReadFile() //считывание из файла построчно в string-массив
         {
-            //TempData["path"] = @"C:\ProgramData\users.txt";
-            //path = (string)TempData["path"]!;
+            TempData["path"] = @"C:\ProgramData\users.txt";
+            path = (string)TempData["path"]!;
             int linescount = 0;
             using (StreamReader sr = new StreamReader(path))
             {

@@ -1,0 +1,11 @@
+﻿@model Index
+@{
+    ViewData["Title"] = "AlertPage";
+}
+
+<div>
+    <h1 class = "display-4"> Вы ввели пароль неправильно три раза. Может, вы его забыли?, </h1>
+    <p>
+            <input type="button" value="Вернуться на страницу ввода пароля" onclick="location.href='@Url.Action("Index", "Home")'" />
+    </p>
+</div>
